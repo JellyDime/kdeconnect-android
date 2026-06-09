@@ -9,8 +9,6 @@ on:
   workflow_dispatch:
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
   UPSTREAM_REPO: KDE/kdeconnect-android
   TARGET_BRANCH: master
 
@@ -25,7 +23,7 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           token: ${{ secrets.PAT_TOKEN }}
           ref: ${{ env.TARGET_BRANCH }}
@@ -65,12 +63,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -88,9 +86,6 @@ jobs:
       - name: Verify and Locate APK
         id: check_apk
         run: |
-          # FIX 2: The build.gradle.kts renames the APK to include the Git short hash.
-          # We cannot hardcode the filename, so we use find to locate the most recently 
-          # modified APK in the correct single-module output directory.
           FINAL_APK=$(find ${{ env.APK_OUTPUT_DIR }} -name "*.apk" -type f -exec ls -t {} + | head -n 1)
 
           if [ -z "$FINAL_APK" ] || [ ! -f "$FINAL_APK" ]; then
@@ -102,7 +97,7 @@ jobs:
           echo "✅ Successfully located APK at: $FINAL_APK"
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
